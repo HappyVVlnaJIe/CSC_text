@@ -40,15 +40,30 @@ private slots:
 
     void on_findTextButton_clicked();
 
+    void on_registrationButton_clicked();
+
+    void on_authorizationButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QTimer *serverTimer;
     QTimer *clientTimer;
     QTimer *chatTimer;
-    std::unordered_map<std::string, QListWidgetItem> chats;
+    std::unordered_map<std::string, QListWidgetItem*> chats;
     std::map<QListWidgetItem, std::vector<std::string>> chats_contents;
     std::map<QListWidgetItem, std::string> server_chats;
     std::map<QListWidgetItem, DefaultClient*> clients_chats;
+    QListWidgetItem* client_chat;
     std::string client_appeal = "Вы: ";
+
+    const char* auth_server_address ="127.0.0.1";
+    const char* auth_server_port ="12345";
+    std::string separator = "@";
+    std::string tech_message = "*technical message* connected";
+    std::string positive_response = "OK";
+    std::string negative_response = "NOT";
+
+    std::string registration_command = "registration";
+    std::string authorization_command = "authorization";
 };
 #endif // MAINWINDOW_H

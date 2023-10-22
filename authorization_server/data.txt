@@ -1,0 +1,3 @@
+admin admin
+ne_admin ne_admin
+user 12345

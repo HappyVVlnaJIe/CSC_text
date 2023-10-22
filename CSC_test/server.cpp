@@ -4,16 +4,17 @@
 #include "server.h"
 
 
-DefaultServer::DefaultServer(const char* port, std::string signature)
+DefaultServer::DefaultServer(const char* port, std::string tech_message)
 {
     error = 0;
-    InitializeWinSocket(port, signature);
+    InitializeWinSocket(port);
     CreateMasterSocket();
     Bind();
     Listen();
+    this->tech_message = tech_message;
 }
 
-void DefaultServer::InitializeWinSocket(const char* port, std::string signature)
+void DefaultServer::InitializeWinSocket(const char* port)
 {
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (iResult != 0)
@@ -36,7 +37,6 @@ void DefaultServer::InitializeWinSocket(const char* port, std::string signature)
         WSACleanup();
         return;
     }
-    this->signature = signature; //TODO: сделать генерацию подписей (мб запрашивать у серва, после авторизации)
 }
 
 void DefaultServer::CreateMasterSocket()
@@ -102,7 +102,7 @@ void DefaultServer::CheckClient()
         }
         else
         {
-            std::string message = "*technical message* connected" + separator + signature;
+            std::string message = tech_message;
             iSendResult = send( ClientSocket, message.c_str(), message.size(), 0 );
             if (iSendResult == SOCKET_ERROR)
             {
@@ -148,13 +148,12 @@ void DefaultServer::Read()
     if (message != "")
     {
         message[last] = '\0';
-        this->messages.push(ParseMessage(message, separator));
+        this->messages.push(message);
     }
 }
 
-bool DefaultServer::Send(std::string client_signature, std::string text)
+bool DefaultServer::Send(std::string client_signature, std::string message)
 {
-    std::string message = text + separator + signature;
     iSendResult = send( ClientSocket, message.c_str(), message.size(), 0 );
     if (iSendResult == SOCKET_ERROR)
     {

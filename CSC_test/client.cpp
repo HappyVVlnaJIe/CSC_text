@@ -1,14 +1,15 @@
 #include "client.h"
 #include<QDebug>
 
-DefaultClient::DefaultClient(const char* server_address, const char* server_port,  std::string signature)
+DefaultClient::DefaultClient(const char* server_address, const char* server_port, u_long iMode)
 {
     error = 0;
-    InitializeWinSocket(signature);
+    this->iMode = iMode;
+    InitializeWinSocket();
     ConnectToServer(server_address, server_port);
 }
 
-void DefaultClient::InitializeWinSocket(std::string signature)
+void DefaultClient::InitializeWinSocket()
 {
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (iResult != 0)
@@ -22,7 +23,6 @@ void DefaultClient::InitializeWinSocket(std::string signature)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    this->signature = signature;
 }
 
 void DefaultClient::ConnectToServer(const char* server_address, const char* server_port)
@@ -78,9 +78,8 @@ void DefaultClient::ConnectToServer(const char* server_address, const char* serv
     }
 }
 
-bool DefaultClient::Send(std::string text)
+bool DefaultClient::Send(std::string message)
 {
-    std::string message = text + separator + signature;
     iResult = send( ConnectSocket, message.c_str(), message.size(), 0 );
     if (iResult == SOCKET_ERROR)
     {
@@ -92,7 +91,7 @@ bool DefaultClient::Send(std::string text)
     return true;
 }
 
-Message* DefaultClient::ReadFromServer()
+std::string DefaultClient::ReadFromServer()
 {
     std::string message = "";
     int last = 0;
@@ -116,14 +115,16 @@ Message* DefaultClient::ReadFromServer()
 
     } while( iResult > 0 );
 
-    if (message == "") return nullptr;
-
-    message[last] = '\0';
-    return  new Message(ParseMessage(message, separator));
+    if (message != "")
+    {
+        message[last] = '\0';
+    }
+    return  message;
 }
 
 DefaultClient::~DefaultClient()
 {
+    iResult = shutdown(ConnectSocket, SD_SEND);
     closesocket(ConnectSocket);
     WSACleanup();
 }

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory>
-#include "message.h"
+#include <string>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -30,20 +30,18 @@ class DefaultClient
     int iResult;
     int recvbuflen = DEFAULT_BUFLEN;
 
-    std::string signature;
-    std::string separator = "@";
     int error = 0;
 
     u_long iMode = 1;
 
-    void InitializeWinSocket(std::string signature);
+    void InitializeWinSocket();
     void ConnectToServer(const char* server_address, const char* server_port);
     void Read();
 
 public:
-    DefaultClient(const char* server_address, const char* server_port,  std::string signature);
+    DefaultClient(const char* server_address, const char* server_port,  u_long iMode);
     ~DefaultClient();
-    bool Send(std::string text);
-    Message* ReadFromServer();
+    bool Send(std::string message);
+    std::string ReadFromServer();
     const int Status();
 };
